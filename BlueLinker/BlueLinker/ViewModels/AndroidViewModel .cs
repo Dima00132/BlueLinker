@@ -24,7 +24,7 @@ namespace BlueLinker.ViewModels
         }
 
         [RelayCommand]
-        private async Task ConnectAsync()
+        public async Task ConnectAsync()
         {
             Status = "Подключение...";
             try
@@ -39,7 +39,7 @@ namespace BlueLinker.ViewModels
         }
 
         [RelayCommand]
-        private async Task SendDataAsync()
+        public async Task SendDataAsync()
         {
             try
             {
@@ -53,7 +53,7 @@ namespace BlueLinker.ViewModels
         }
 
         [RelayCommand]
-        private async Task ReceiveDataAsync()
+        public async Task ReceiveDataAsync()
         {
             try
             {

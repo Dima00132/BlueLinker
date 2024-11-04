@@ -12,7 +12,7 @@
 		<TextBlock Text="{Binding Status}" Margin="10" />
 
 		<Button Content="Подключиться" Command="{Binding ConnectCommand}" Margin="10" />
-		<Button Content="Отправить данные" Command="{Binding SendCommand}" Margin="10" />
-		<Button Content="Получить данные" Command="{Binding ReceiveCommand}" Margin="10" />
+		<Button Content="Отправить данные" Command="{Binding SendDataCommand}" Margin="10" />
+		<Button Content="Получить данные" Command="{Binding ReceiveDataCommand}" Margin="10" />
 	</StackPanel>
 </UserControl>
