@@ -29,7 +29,7 @@ namespace BlueLinker.ViewModels
             Status = "Подключение...";
             try
             {
-                bool isConnected = await _bluetoothService.ConnectAsync("DeviceNameOrAddress");
+                bool isConnected = await _bluetoothService.ConnectAsync("A51 пользователя дима");
                 Status = isConnected ? "Подключено" : "Не удалось подключиться";
             }
             catch (Exception ex)
