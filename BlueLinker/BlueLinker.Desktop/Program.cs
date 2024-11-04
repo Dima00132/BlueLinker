@@ -3,6 +3,7 @@ using BlueLinker.Core.Bluetooth;
 using BlueLinker.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading.Tasks;
 
 namespace BlueLinker.Desktop
 {
@@ -18,8 +19,10 @@ namespace BlueLinker.Desktop
             RegisterWindowsServices(serviceCollection);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            App.SetServiceProvider(serviceProvider); // Устанавливаем сервис-провайдер
+            
 
+            App.SetServiceProvider(serviceProvider); // Устанавливаем сервис-провайдер
+            Task.Run(() => (serviceProvider.GetService<IBluetoothService>() as WindowsBluetoothService).StartListeningForConnectionsAsync());
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .WithInterFont(); // Используем сервис-провайдер

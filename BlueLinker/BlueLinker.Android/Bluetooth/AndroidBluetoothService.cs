@@ -5,21 +5,84 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BlueLinker.Core.Bluetooth;
+using Java.Util;
 
 namespace BlueLinker.Android
 {
     public class AndroidBluetoothService : IBluetoothService
     {
-        private readonly BluetoothAdapter _adapter;
+        
         private BluetoothSocket _socket;
 
-        private static readonly string UUID_STRING = "00001101-0000-1000-8000-00805f9b34fb"; // UUID для Serial Port
+        private BluetoothAdapter _adapter;
+        private BluetoothServerSocket _serverSocket;
+
+        private const string UUID_STRING = "00001101-0000-1000-8000-00805F9B34FB";
 
         public AndroidBluetoothService()
         {
             _adapter = BluetoothAdapter.DefaultAdapter;
         }
 
+        public async Task StartListeningForConnectionsAsync()
+        {
+            UUID uuid = UUID.FromString(UUID_STRING);
+            _serverSocket = _adapter.ListenUsingRfcommWithServiceRecord("MyBluetoothService", uuid);
+
+            while (true)
+            {
+                try
+                {
+                    BluetoothSocket socket = await Task.Run(() => _serverSocket.Accept());
+                    if (socket != null)
+                    {
+                        // Обработка нового подключения
+                        OnDeviceConnected(socket);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Обработка ошибок
+                    Console.WriteLine($"Ошибка при ожидании подключения: {ex.Message}");
+                }
+            }
+        }
+
+        private async void OnDeviceConnected(BluetoothSocket socket)
+        {
+            // Логика обработки подключения
+            try
+            {
+                // Получаем поток для чтения и записи данных
+                using var stream = socket.InputStream;
+                using var outputStream = socket.OutputStream;
+
+                // Пример: Отправка приветственного сообщения
+                var welcomeMessage = Encoding.UTF8.GetBytes("Привет от Android!");
+                await outputStream.WriteAsync(welcomeMessage, 0, welcomeMessage.Length);
+
+                // Чтение данных от подключенного устройства
+                var buffer = new byte[1024];
+                int bytesRead;
+
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    var receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    Console.WriteLine($"Получено: {receivedData}");
+
+                    // Эхо-ответ на полученные данные
+                    await outputStream.WriteAsync(buffer, 0, bytesRead);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при обработке подключения: {ex.Message}");
+            }
+            finally
+            {
+                socket.Close();
+            }
+        }
         public async Task<bool> ConnectAsync(string deviceNameOrAddress)
         {
             if (_adapter == null || !_adapter.IsEnabled)

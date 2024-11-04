@@ -1,19 +1,31 @@
 ﻿using Android;
 using Android.App;
-using Android.Bluetooth;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Widget;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using Avalonia;
+using Avalonia.Android;
 using BlueLinker.Core.Bluetooth;
+using BlueLinker.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Toast = Android.Widget.Toast;
 
 namespace BlueLinker.Android
 {
-    [Activity(Label = "BlueLinker.Android", Theme = "@style/MyTheme.NoActionBar", MainLauncher = true)]
-    public class MainActivity : Avalonia.Android.AvaloniaMainActivity<App>
+    [Activity(
+        Label = "BlueLinker.Android",
+        Theme = "@style/MyTheme.NoActionBar",
+        Icon = "@drawable/icon",
+        MainLauncher = true,
+        ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
+    public class MainActivity : AvaloniaMainActivity<App>
     {
         private const int RequestBluetoothPermissions = 1;
 
@@ -21,42 +33,64 @@ namespace BlueLinker.Android
         {
             base.OnCreate(savedInstanceState);
             CheckBluetoothPermissions();
+            var serviceProvider = App.GetServiceProvider();
+            Task.Run(() => (serviceProvider.GetService<IBluetoothService>() as AndroidBluetoothService)?.StartListeningForConnectionsAsync());
         }
 
         protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
         {
             var serviceCollection = new ServiceCollection();
+
+            // Регистрация сервисов для Android
             RegisterAndroidServices(serviceCollection);
+
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            App.SetServiceProvider(serviceProvider);
+            App.SetServiceProvider(serviceProvider); // Устанавливаем сервис-провайдер
+
             return base.CustomizeAppBuilder(builder)
-                .WithInterFont(); // Используем сервис-провайдер
+                .WithInterFont();
         }
 
         private void RegisterAndroidServices(IServiceCollection services)
         {
             services.AddSingleton<IBluetoothService, AndroidBluetoothService>();
-            // Регистрация других необходимых сервисов
+            services.AddTransient<AndroidViewModel>();
+            // Добавьте другие зависимости Android, если необходимо
         }
 
         private void CheckBluetoothPermissions()
         {
-            if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.Bluetooth) != (int)Permission.Granted ||
-                ContextCompat.CheckSelfPermission(this, Manifest.Permission.BluetoothAdmin) != (int)Permission.Granted ||
-                ContextCompat.CheckSelfPermission(this, Manifest.Permission.BluetoothScan) != (int)Permission.Granted ||
-                ContextCompat.CheckSelfPermission(this, Manifest.Permission.BluetoothConnect) != (int)Permission.Granted)
+            // Проверка необходимых разрешений
+            var permissionsNeeded = new List<string>
             {
-                ActivityCompat.RequestPermissions(this, new[]
-                {
-                    Manifest.Permission.Bluetooth,
-                    Manifest.Permission.BluetoothAdmin,
-                    Manifest.Permission.BluetoothScan,
-                    Manifest.Permission.BluetoothConnect
-                }, RequestBluetoothPermissions);
+                Manifest.Permission.Bluetooth,
+                Manifest.Permission.BluetoothAdmin,
+                Manifest.Permission.AccessFineLocation,
+                Manifest.Permission.AccessCoarseLocation
+            };
+
+            // Для Android 12 и выше нужно добавлять дополнительные разрешения
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.S)
+            {
+                permissionsNeeded.Add(Manifest.Permission.BluetoothScan);
+                permissionsNeeded.Add(Manifest.Permission.BluetoothConnect);
+                permissionsNeeded.Add(Manifest.Permission.BluetoothAdvertise); // Опционально
+            }
+
+            // Проверка разрешений
+            var permissionsToRequest = permissionsNeeded
+                .Where(permission => ContextCompat.CheckSelfPermission(this, permission) != (int)Permission.Granted)
+                .ToList();
+
+            if (permissionsToRequest.Any())
+            {
+                // Запрос разрешений
+                ActivityCompat.RequestPermissions(this, permissionsToRequest.ToArray(), RequestBluetoothPermissions);
             }
             else
             {
-                Toast.MakeText(this, "Bluetooth разрешения получены.", ToastLength.Short).Show();
+                // Все разрешения предоставлены, можно продолжать работу с Bluetooth
+                OnBluetoothPermissionsGranted();
             }
         }
 
@@ -66,15 +100,23 @@ namespace BlueLinker.Android
 
             if (requestCode == RequestBluetoothPermissions)
             {
-                if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                if (grantResults.Length > 0 && grantResults.All(result => result == Permission.Granted))
                 {
-                    Toast.MakeText(this, "Разрешения получены.", ToastLength.Short).Show();
+                    // Разрешения получены, продолжаем работу с Bluetooth
+                    OnBluetoothPermissionsGranted();
                 }
                 else
                 {
-                    Toast.MakeText(this, "Для работы приложения требуются разрешения на Bluetooth.", ToastLength.Long).Show();
+                    // Разрешения не были получены, информируем пользователя
+                    Toast.MakeText(this, "Для работы с Bluetooth необходимы разрешения.", ToastLength.Long).Show();
                 }
             }
+        }
+
+        private void OnBluetoothPermissionsGranted()
+        {
+            // Здесь можно добавить логику для продолжения работы с Bluetooth
+            Toast.MakeText(this, "Разрешения на использование Bluetooth получены.", ToastLength.Short).Show();
         }
     }
 }

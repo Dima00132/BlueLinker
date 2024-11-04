@@ -13,8 +13,68 @@ namespace BlueLinker.Desktop
     {
         private BluetoothClient _client;
          private Stream _stream;
-
+        private BluetoothListener _listener;
         private static readonly string UUID_STRING = "00001101-0000-1000-8000-00805f9b34fb"; // UUID для Serial Port
+
+
+        public async Task StartListeningForConnectionsAsync()
+        {
+            Guid uuid = new Guid(UUID_STRING);
+            _listener = new BluetoothListener(uuid);
+            _listener.Start();
+
+            while (true)
+            {
+                try
+                {
+                    var client = await Task.Run(() => _listener.AcceptBluetoothClient());
+                    // Обработка нового подключения
+                    OnDeviceConnected(client);
+                }
+                catch (Exception ex)
+                {
+                    // Обработка ошибок
+                    Console.WriteLine($"Ошибка при ожидании подключения: {ex.Message}");
+                }
+            }
+        }
+
+        private async void OnDeviceConnected(BluetoothClient client)
+        {
+            // Логика обработки подключения
+            try
+            {
+                // Получаем поток для чтения и записи данных
+                using var stream = client.GetStream();
+                using var memoryStream = new MemoryStream();
+
+                // Пример: Отправка приветственного сообщения
+                var welcomeMessage = Encoding.UTF8.GetBytes("Привет от ПК!");
+                await stream.WriteAsync(welcomeMessage, 0, welcomeMessage.Length);
+
+                // Чтение данных от подключенного устройства
+                var buffer = new byte[1024];
+                int bytesRead;
+
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    var receivedData = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                    Console.WriteLine($"Получено: {receivedData}");
+
+                    // Эхо-ответ на полученные данные
+                    await stream.WriteAsync(buffer, 0, bytesRead);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при обработке подключения: {ex.Message}");
+            }
+            finally
+            {
+                client.Close();
+            }
+        }
+
 
         public async Task<bool> ConnectAsync(string deviceNameOrAddress)
         {

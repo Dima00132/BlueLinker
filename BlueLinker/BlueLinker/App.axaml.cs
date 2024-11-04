@@ -21,6 +21,11 @@ namespace BlueLinker
             // Здесь регистрируйте ваши общие сервисы
         }
 
+        public static IServiceProvider GetServiceProvider()
+        {
+            return _serviceProvider ;
+        }
+
         public static void SetServiceProvider(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
