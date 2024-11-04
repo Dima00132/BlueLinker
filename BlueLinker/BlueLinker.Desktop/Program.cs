@@ -1,22 +1,37 @@
 ﻿using Avalonia;
+using BlueLinker.Core.Bluetooth;
+using BlueLinker.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace BlueLinker.Desktop
 {
+
     internal sealed class Program
     {
-        // Initialization code. Don't use any Avalonia, third-party APIs or any
-        // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-        // yet and stuff might break.
         [STAThread]
         public static void Main(string[] args) => BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
 
-        // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
-            => AppBuilder.Configure<App>()
+        {
+            var serviceCollection = new ServiceCollection();
+            RegisterWindowsServices(serviceCollection);
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+
+            App.SetServiceProvider(serviceProvider); // Устанавливаем сервис-провайдер
+
+            return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .WithInterFont()
-                .LogToTrace();
+                .WithInterFont(); // Используем сервис-провайдер
+        }
+
+        private static void RegisterWindowsServices(IServiceCollection services)
+        {
+            services.AddSingleton<IBluetoothService, WindowsBluetoothService>();
+            services.AddTransient<WindowsViewModel>();
+            // Добавьте другие зависимости Windows, если необходимо
+        }
     }
 }
+

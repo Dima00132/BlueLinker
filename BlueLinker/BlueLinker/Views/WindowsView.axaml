@@ -1,0 +1,18 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="BlueLinker.WindowsView"
+		xmlns:local="clr-namespace:BlueLinker.ViewModels"
+        x:DataType="local:WindowsViewModel">
+	<!-- Укажите правильное пространство имен для WindowsViewModel -->
+
+	<StackPanel>
+		<TextBlock Text="{Binding Status}" Margin="10" />
+
+		<Button Content="Подключиться" Command="{Binding ConnectCommand}" Margin="10" />
+		<Button Content="Отправить данные" Command="{Binding SendCommand}" Margin="10" />
+		<Button Content="Получить данные" Command="{Binding ReceiveCommand}" Margin="10" />
+	</StackPanel>
+</Window>

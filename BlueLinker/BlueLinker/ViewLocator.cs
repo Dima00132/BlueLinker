@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using BlueLinker.ViewModels;
+using BlueLinker.ViewModels.Base;
 using System;
 
 namespace BlueLinker

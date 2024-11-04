@@ -1,15 +1,31 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using BlueLinker.ViewModels;
-using BlueLinker.Views;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace BlueLinker
 {
-    public partial class App : Application
+    public class App : Application
     {
+        private static IServiceProvider _serviceProvider;
+
+        public App()
+        {
+            // Пустой конструктор для соответствия требованиям
+        }
+
+        public static void ConfigureServices(IServiceCollection services)
+        {
+            // Здесь регистрируйте ваши общие сервисы
+        }
+
+        public static void SetServiceProvider(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
+
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
@@ -19,19 +35,16 @@ namespace BlueLinker
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                // Line below is needed to remove Avalonia data validation.
-                // Without this line you will get duplicate validations from both Avalonia and CT
-                BindingPlugins.DataValidators.RemoveAt(0);
-                desktop.MainWindow = new MainWindow
+                desktop.MainWindow = new WindowsView
                 {
-                    DataContext = new MainViewModel()
+                    DataContext = _serviceProvider.GetService<WindowsViewModel>()
                 };
             }
             else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
             {
-                singleViewPlatform.MainView = new MainView
+                singleViewPlatform.MainView = new AndroidView
                 {
-                    DataContext = new MainViewModel()
+                    DataContext = _serviceProvider.GetService<AndroidViewModel>()
                 };
             }
 

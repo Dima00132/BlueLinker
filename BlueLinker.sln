@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueLinker", "BlueLinker\BlueLinker\BlueLinker.csproj", "{2DB591F9-584D-4232-A793-64D2220F1AFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueLinker", "BlueLinker\BlueLinker\BlueLinker.csproj", "{2DB591F9-584D-4232-A793-64D2220F1AFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueLinker.Android", "BlueLinker\BlueLinker.Android\BlueLinker.Android.csproj", "{9BC9BDF4-5A52-479A-AD8E-F031342153C3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueLinker.Android", "BlueLinker\BlueLinker.Android\BlueLinker.Android.csproj", "{9BC9BDF4-5A52-479A-AD8E-F031342153C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueLinker.Desktop", "BlueLinker\BlueLinker.Desktop\BlueLinker.Desktop.csproj", "{85123564-2610-4185-AC4B-4BFF310FF87B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlueLinker.Desktop", "BlueLinker\BlueLinker.Desktop\BlueLinker.Desktop.csproj", "{85123564-2610-4185-AC4B-4BFF310FF87B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
