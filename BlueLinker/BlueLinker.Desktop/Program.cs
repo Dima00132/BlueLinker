@@ -6,7 +6,6 @@ using System;
 
 namespace BlueLinker.Desktop
 {
-
     internal sealed class Program
     {
         [STAThread]
@@ -34,4 +33,3 @@ namespace BlueLinker.Desktop
         }
     }
 }
-
