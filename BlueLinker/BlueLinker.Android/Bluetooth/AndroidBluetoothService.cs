@@ -19,14 +19,25 @@ namespace BlueLinker.Core.Bluetooth
             if (adapter == null || !adapter.IsEnabled)
                 throw new Exception("Bluetooth не доступен или не включен.");
 
+            // Найти устройство по имени или адресу
             var device = adapter.BondedDevices.FirstOrDefault(d => d.Name == deviceNameOrAddress || d.Address == deviceNameOrAddress);
             if (device == null)
                 throw new Exception("Устройство не найдено среди сопряженных.");
 
+            // Используйте корректный UUID
             UUID serviceUUID = UUID.FromString("00001101-0000-1000-8000-00805F9B34FB");
-            _socket = device.CreateRfcommSocketToServiceRecord(serviceUUID);
 
-            await _socket.ConnectAsync();
+            // Создайте сокет и подключитесь
+            try
+            {
+                _socket = device.CreateRfcommSocketToServiceRecord(serviceUUID);
+                await _socket.ConnectAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка подключения: {ex.Message}");
+            }
+
             return _socket.IsConnected;
         }
 

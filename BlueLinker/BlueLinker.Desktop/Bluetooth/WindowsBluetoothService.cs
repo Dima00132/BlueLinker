@@ -26,12 +26,23 @@ namespace BlueLinker.Desktop
         {
             _client = new BluetoothClient();
             var devices = _client.DiscoverDevices();
+
+            // Найти устройство по имени или адресу
             var device = devices.FirstOrDefault(d => d.DeviceName == deviceNameOrAddress || d.DeviceAddress.ToString() == deviceNameOrAddress);
 
             if (device == null)
                 throw new Exception("Устройство не найдено.");
 
-            await Task.Run(() => _client.Connect(device.DeviceAddress, BluetoothService.SerialPort));
+            // Подключение к устройству
+            try
+            {
+                await Task.Run(() => _client.Connect(device.DeviceAddress, BluetoothService.SerialPort));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка подключения: {ex.Message}");
+            }
+
             return _client.Connected;
         }
 
